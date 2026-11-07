@@ -1,10 +1,23 @@
 #!/usr/bin/env bash
-# Runs ON THE SERVER after release.sh has copied the code to /opt/valor.
-# build → database → migrations → demo data (first run only) → web → health check.
+# Runs ON THE SERVER: /opt/valor/deploy/deploy.sh
+# git pull (GitHub Alim-spec/valor, read-only deploy key) → build → migrations →
+# demo data (first run only) → web → health check.
 set -Eeuo pipefail
+
+# All code is inside functions: bash reads them before running, so a git pull that changes
+# this file cannot swap commands mid-run.
 
 cd /opt/valor
 COMPOSE=(docker compose -f docker-compose.prod.yml)
+
+pull() {
+  echo "== 0. Code from GitHub"
+  git pull --ff-only
+  git log --oneline -1
+  exec env DEPLOY_PULLED=1 "$0" "$@"
+}
+
+main() {
 
 [ -f .env ] || { echo "!! /opt/valor/.env is missing (copy deploy/env.prod.example and fill it)"; exit 1; }
 docker network inspect edge >/dev/null 2>&1 || docker network create edge >/dev/null
@@ -34,3 +47,11 @@ echo "== 5. State"
 "${COMPOSE[@]}" ps
 docker image prune -f >/dev/null
 echo "== Done"
+}
+
+if [ -z "${DEPLOY_PULLED:-}" ]; then
+  pull "$@"
+else
+  main "$@"
+fi
+exit

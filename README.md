@@ -31,13 +31,14 @@ cp deploy/env.prod.example .env  # для локальной работы: DJANG
 Valor полностью отделён от лизинга: своя папка `/opt/valor`, свой docker-compose проект `valor`, своя база `valor-db` (том `valor_valor_pgdata`) и своя внутренняя сеть.
 С остальным сервером Valor связан только внешней сетью `edge`: через неё общий Caddy отправляет запросы `centrum.kz/valor-test/*` в контейнер `valor-web`.
 
-- Выкладка с Mac: `./deploy/release.sh` (тесты → копия кода → `deploy/deploy.sh` на сервере)
+- Код на сервере — клон https://github.com/Alim-spec/valor (свой ключ только для чтения `~/.ssh/github_valor`, адрес `github-valor` в `~/.ssh/config`)
+- Выкладка с Mac: `./deploy/release.sh` (тесты → push в GitHub → на сервере `deploy/deploy.sh`: git pull, сборка, миграции)
 - Бэкап: `deploy/backup.sh` (cron, см. `deploy/crontab.example`) → `/opt/backups/valor`
 
 ### Переезд на другой сервер
 
 1. На старом сервере: `deploy/backup.sh`, скопировать дамп и `/opt/valor/.env`.
-2. На новом сервере: `VALOR_HOST=user@new ./deploy/release.sh`, положить `.env`, восстановить дамп через `pg_restore` в контейнер `valor-db`.
+2. На новом сервере: добавить ключ только для чтения в репозиторий, `git clone git@github-valor:Alim-spec/valor.git /opt/valor`, положить `.env`, запустить `deploy/deploy.sh`, восстановить дамп через `pg_restore` в контейнер `valor-db`.
 3. В прокси (Caddy) указать новый адрес или отдельный домен Valor.
 
 ## Что дальше по ТЗ
