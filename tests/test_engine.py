@@ -90,3 +90,34 @@ def test_live_acceptance_page_cases_all_pass():
     from funds.golden import run_all
     failed = [r for r in run_all() if not r['passed']]
     assert not failed, failed
+
+
+def _xirr_reference(flows):
+    """The original exhaustive search: 200 bisection steps at full 34-digit precision."""
+    from engine.irr import npv
+    lo, hi = D('-0.99'), D('10')
+    f_lo = npv(lo, flows)
+    for _ in range(200):
+        mid = (lo + hi) / 2
+        f_mid = npv(mid, flows)
+        if (f_mid > 0) == (f_lo > 0):
+            lo, f_lo = mid, f_mid
+        else:
+            hi = mid
+    return ((lo + hi) / 2).quantize(D('0.000001'))
+
+
+@pytest.mark.parametrize('flows', [
+    [(date(2025, 10, 15), D('-1000000')), (date(2026, 1, 15), D('-250000')), (date(2026, 9, 30), D('400000')),
+     (date(2026, 11, 7), D('1100000'))],
+    [(date(2025, 1, 1), D('-100')), (date(2025, 6, 30), D('-37.5')), (date(2027, 3, 31), D('90')),
+     (date(2028, 12, 31), D('120.33'))],
+    [(date(2026, 1, 1), D('-500000')), (date(2026, 12, 31), D('350000'))],     # a loss: negative IRR
+])
+def test_fast_xirr_matches_exhaustive_search(flows):
+    assert xirr(flows) == _xirr_reference(flows)
+
+
+def test_xirr_nets_same_day_flows():
+    a = [(date(2026, 1, 1), D(-60)), (date(2026, 1, 1), D(-40)), (date(2027, 1, 1), D(110))]
+    assert xirr(a) == xirr([(date(2026, 1, 1), D(-100)), (date(2027, 1, 1), D(110))]) == D('0.100000')
