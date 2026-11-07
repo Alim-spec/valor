@@ -8,6 +8,7 @@
 <link rel="icon" href="{% static 'funds/favicon.ico' %}">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'funds/valor.css' %}">
+<script src="{% static 'funds/forms.js' %}" defer></script>
 </head>
 <body>
 <div class="login">
@@ -15,6 +16,7 @@
     {% csrf_token %}
     <img src="{% static 'funds/valor-logo.svg' %}" alt="Valor Capital">
     <p class="p">{% t "Fund Administration" %} · <span class="langs"><a href="?lang=en" class="{% if lang == 'en' %}on{% endif %}">EN</a><a href="?lang=ru" class="{% if lang == 'ru' %}on{% endif %}">RU</a></span></p>
+    {% if messages %}<ul class="msgs">{% for m in messages %}<li class="{{ m.tags }}">{{ m }}</li>{% endfor %}</ul>{% endif %}
     {% if form.errors %}<ul class="msgs"><li class="error">{% t "Invalid username or password" %}</li></ul>{% endif %}
     <label for="id_username">{% t "Username" %}</label>
     <input id="id_username" name="username" autocomplete="username" required autofocus>

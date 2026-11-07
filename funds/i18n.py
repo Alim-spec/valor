@@ -155,6 +155,8 @@ RU = {
     'Credit': 'Кредит',
     'Memo': 'Описание',
     'Control': 'Контроль',
+    'The page was out of date — please repeat the action': 'Страница устарела — повторите действие',
+    'The page was out of date — please sign in again': 'Страница устарела — войдите ещё раз',
     'expected': 'ожидается',
     'Returned before': 'Возвращено ранее',
 }

@@ -78,6 +78,7 @@ input, select, textarea { font: inherit; padding: 8px 10px; border: 1px solid #c
 .btn { font: inherit; display: inline-block; border: 0; border-radius: 7px; padding: 9px 16px; cursor: pointer;
        background: var(--navy); color: #fff; font-weight: 500; }
 .btn:hover { background: var(--navy-2); text-decoration: none; }
+form.sending .btn { opacity: .6; cursor: progress; }
 .btn.light { background: #eef1f6; color: var(--navy); }
 .btn.ok { background: var(--ok); }
 .btn.bad { background: var(--bad); }
@@ -86,6 +87,7 @@ input, select, textarea { font: inherit; padding: 8px 10px; border: 1px solid #c
 .msgs li { padding: 10px 14px; border-radius: 8px; margin-bottom: 6px; }
 .msgs .success { background: var(--ok-bg); color: var(--ok); }
 .msgs .error { background: var(--bad-bg); color: var(--bad); }
+.msgs .warning { background: var(--warn-bg); color: var(--warn); }
 .msgs .info { background: #eaf1ff; color: var(--accent); }
 .note { color: var(--muted); font-size: 12px; }
 .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }

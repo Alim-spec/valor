@@ -5,6 +5,8 @@ from django.contrib import messages
 from django.contrib.auth import views as auth_views
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
@@ -33,6 +35,22 @@ def fund_or_404():
 
 def in_group(user, name):
     return user.is_superuser or user.groups.filter(name=name).exists()
+
+
+def csrf_failure(request, reason=''):
+    """Instead of a bare 403 page: a form sent twice or from a stale page.
+    Signed in — go on to the page; otherwise back to the form with a short note."""
+    lang = getattr(request, 'lang', 'en')
+    if request.user.is_authenticated:
+        target = request.GET.get('next') if request.resolver_match and request.resolver_match.url_name == 'login' \
+            else request.get_full_path()
+        if not target or not url_has_allowed_host_and_scheme(target, {request.get_host()}, request.is_secure()):
+            target = reverse('dashboard')
+        if request.resolver_match and request.resolver_match.url_name != 'login':
+            messages.warning(request, translate('The page was out of date — please repeat the action', lang))
+        return redirect(target)
+    messages.warning(request, translate('The page was out of date — please sign in again', lang))
+    return redirect(request.get_full_path())
 
 
 def healthz(request):

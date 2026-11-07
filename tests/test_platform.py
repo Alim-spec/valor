@@ -110,3 +110,33 @@ def test_equalisation_preview(demo):
     assert st.drawn_after['LP07'] == st.catch_up == sum(st.refunds.values())
     # after rebalancing every LP is drawn pro rata to Commitment (60m existing + 10m new)
     assert abs(st.drawn_after['LP01'] / D(20) - st.drawn_after['LP07'] / D(10)) < D('0.01')
+
+
+def _csrf(client, url):
+    client.get(url)
+    return client.cookies['valor_csrf'].value
+
+
+def test_double_submitted_login_lands_in_dashboard(demo):
+    """Login form sent twice (double click): the second POST carries a rotated-out token.
+    The user must end up in the workbench, not on a bare 403 page."""
+    from django.test import Client
+    c = Client(enforce_csrf_checks=True)
+    url = reverse('login') + '?next=' + reverse('dashboard')
+    token = _csrf(c, url)
+    form = {'csrfmiddlewaretoken': token, 'username': 'operator', 'password': 'test-password-123'}
+    assert c.post(url, form).status_code == 302
+    r = c.post(url, form)                      # same, now stale, token
+    assert r.status_code == 302 and r['Location'] == reverse('dashboard')
+    assert c.get(r['Location']).status_code == 200
+
+
+def test_stale_form_when_signed_out_returns_to_login(demo):
+    from django.test import Client
+    c = Client(enforce_csrf_checks=True)
+    url = reverse('login')
+    _csrf(c, url)
+    r = c.post(url, {'csrfmiddlewaretoken': 'x' * 64, 'username': 'operator', 'password': 'test-password-123'})
+    assert r.status_code == 302 and r['Location'].startswith(url)
+    page = c.get(r['Location']).content.decode()
+    assert 'out of date' in page
