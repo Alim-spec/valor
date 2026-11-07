@@ -1,0 +1,22 @@
+{% extends "funds/base.html" %}{% load valor %}
+{% block title %}{% t "Audit trail" %}{% endblock %}
+{% block content %}
+<h1>{% t "Audit trail" %}</h1>
+<p class="sub">ARC-03, NFR-02 · append-only: events and ledger rows cannot be changed or deleted; corrections are reversing entries</p>
+<div class="card scroll">
+  <table>
+    <tr><th>{% t "When" %}</th><th>{% t "Who" %}</th><th>{% t "What" %}</th><th>Before → After</th><th>{% t "Why" %}</th></tr>
+    {% for e in events %}
+    <tr><td class="mono">{{ e.at|date:"d.m.Y H:i:s" }}</td><td>{{ e.actor.username|default:"system" }}</td><td>{{ e.action }}<div class="note">{{ e.object_type }} #{{ e.object_id }}</div></td>
+        <td class="mono">{{ e.before|default:"" }} → {{ e.after|default:"" }}</td><td>{{ e.reason }}</td></tr>
+    {% endfor %}
+  </table>
+</div>
+<div class="card scroll">
+  <h2>{% t "Ledger" %}</h2>
+  <table>
+    <tr><th>#</th><th>{% t "Date" %}</th><th>Journal</th><th>{% t "Account" %}</th><th>{% t "Partner" %}</th><th class="n">{% t "Debit" %}</th><th class="n">{% t "Credit" %}</th><th>{% t "Who" %}</th></tr>
+    {% for l in ledger %}<tr><td>{{ l.pk }}</td><td>{{ l.date|date:"d.m.Y" }}</td><td class="mono">{{ l.journal }}</td><td>{{ l.account }}</td><td>{{ l.partner.code|default:"" }}</td><td class="n">{{ l.debit|money }}</td><td class="n">{{ l.credit|money }}</td><td>{{ l.actor.username }}</td></tr>{% endfor %}
+  </table>
+</div>
+{% endblock %}

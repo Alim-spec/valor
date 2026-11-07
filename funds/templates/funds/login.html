@@ -1,0 +1,29 @@
+{% load static valor %}<!doctype html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>{% t "Sign in" %} · Valor Capital</title>
+<link rel="icon" href="{% static 'funds/favicon.ico' %}">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'funds/valor.css' %}">
+</head>
+<body>
+<div class="login">
+  <form class="box" method="post">
+    {% csrf_token %}
+    <img src="{% static 'funds/valor-logo.svg' %}" alt="Valor Capital">
+    <p class="p">{% t "Fund Administration" %} · <span class="langs"><a href="?lang=en" class="{% if lang == 'en' %}on{% endif %}">EN</a><a href="?lang=ru" class="{% if lang == 'ru' %}on{% endif %}">RU</a></span></p>
+    {% if form.errors %}<ul class="msgs"><li class="error">{% t "Invalid username or password" %}</li></ul>{% endif %}
+    <label for="id_username">{% t "Username" %}</label>
+    <input id="id_username" name="username" autocomplete="username" required autofocus>
+    <label for="id_password">{% t "Password" %}</label>
+    <input id="id_password" name="password" type="password" autocomplete="current-password" required>
+    <input type="hidden" name="next" value="{{ next }}">
+    <button class="btn" type="submit">{% t "Sign in" %}</button>
+    <p class="note" style="margin-top:16px">{% t "Demo environment — fictitious data" %}</p>
+  </form>
+</div>
+</body>
+</html>

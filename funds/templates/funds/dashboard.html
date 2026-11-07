@@ -1,0 +1,50 @@
+{% extends "funds/base.html" %}{% load valor %}
+{% block title %}{% t "Dashboard" %}{% endblock %}
+{% block content %}
+<h1>{% t "Dashboard" %}</h1>
+<p class="sub">{{ as_of|date:"d.m.Y" }} · USD</p>
+
+<div class="kpis">
+  <div class="kpi"><div class="l">{% t "Committed capital" %}</div><div class="v">{{ t.commitment|money:0 }}</div></div>
+  <div class="kpi"><div class="l">{% t "Paid-in capital" %}</div><div class="v">{{ t.paid_in|money:0 }}</div><div class="s">{% t "Called" %} {{ t.called_pct|money:1 }}%</div></div>
+  <div class="kpi"><div class="l">{% t "Unfunded commitment" %}</div><div class="v">{{ t.unfunded|money:0 }}</div></div>
+  <div class="kpi"><div class="l">{% t "Distributed" %}</div><div class="v">{{ t.distributed|money:0 }}</div></div>
+  <div class="kpi"><div class="l">{% t "NAV (LP share)" %}</div><div class="v">{{ t.nav|money:0 }}</div><div class="s">{% t "Gross portfolio value" %} {{ t.gross_nav|money:0 }}</div></div>
+  <div class="kpi"><div class="l">{% t "Accrued carry" %}</div><div class="v">{{ t.accrued_carry|money:0 }}</div><div class="s">{% t "Clawback exposure" %} {{ t.clawback_exposure|money:0 }}</div></div>
+  <div class="kpi"><div class="l">TVPI</div><div class="v">{{ t.tvpi|mult }}</div><div class="s">DPI {{ t.dpi|mult }} · RVPI {{ t.rvpi|mult }}</div></div>
+  <div class="kpi"><div class="l">{% t "Net IRR" %}</div><div class="v">{{ t.irr|pct }}</div></div>
+</div>
+
+<div class="grid2">
+  <div class="card">
+    <h2>{% t "FAA service levels" %} — {{ quarter.quarter_end|date:"d.m.Y" }}</h2>
+    {% if timeline %}
+    <table>
+      <tr><td>{% t "Cut-off" %}</td><td class="n">{{ timeline.cut_off|date:"d.m.Y" }}</td></tr>
+      <tr><td>{% t "GP inputs received" %}</td><td class="n">{{ quarter.inputs_received|date:"d.m.Y" }} {% if timeline.inputs_late %}<span class="tag warn">late</span>{% endif %}</td></tr>
+      <tr><td>{% t "Clock start" %}</td><td class="n">{{ timeline.clock_start|date:"d.m.Y" }}</td></tr>
+      <tr><td>{% t "Draft NAV due" %}</td><td class="n">{{ timeline.draft_nav_due|date:"d.m.Y" }}</td></tr>
+      <tr><td>{% t "Draft issued" %}</td><td class="n">{{ timeline.draft_issued|date:"d.m.Y"|default:"—" }}</td></tr>
+      <tr><td>{% t "Approval" %}</td><td class="n">{{ timeline.approved|date:"d.m.Y"|default:"—" }} {% if timeline.approval_kind %}<span class="tag {% if timeline.approval_kind == 'deemed' %}warn{% else %}ok{% endif %}">{% t timeline.approval_kind %}{% if timeline.approved > as_of %} · {% t "expected" %}{% endif %}</span>{% endif %}</td></tr>
+      <tr><td>{% t "Final NAV due" %}</td><td class="n">{{ timeline.final_nav_due|date:"d.m.Y"|default:"—" }}</td></tr>
+    </table>
+    {% else %}<p class="note">{% t "none" %}</p>{% endif %}
+  </div>
+  <div class="card">
+    <h2>{% t "Awaiting approval" %}</h2>
+    {% for d in pending %}
+      <p><a href="{% url 'distribution' d.pk %}">#{{ d.pk }} {{ d.investment.code }} · {{ d.gross_amount|money }} · {{ d.date|date:"d.m.Y" }}</a> <span class="note">{% t "Made by" %} {{ d.created_by.username }}</span></p>
+    {% empty %}<p class="note">{% t "none" %}</p>{% endfor %}
+    <h2 style="margin-top:18px">{% t "Valor billing" %}</h2>
+    {% for i in invoices_open %}<p>{{ i.number }} · {{ i.total|money }} USD · {% t "unpaid" %}</p>{% empty %}<p class="note">{% t "none" %}</p>{% endfor %}
+  </div>
+</div>
+
+<div class="card">
+  <h2>{% t "Latest events" %}</h2>
+  <div class="scroll"><table>
+    <tr><th>{% t "When" %}</th><th>{% t "Who" %}</th><th>{% t "What" %}</th><th>{% t "Why" %}</th></tr>
+    {% for e in events %}<tr><td class="mono">{{ e.at|date:"d.m.Y H:i" }}</td><td>{{ e.actor.username|default:"system" }}</td><td>{{ e.action }} · {{ e.object_type }} #{{ e.object_id }}</td><td>{{ e.reason }}</td></tr>{% endfor %}
+  </table></div>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "funds/base.html" %}{% load valor %}
+{% block title %}{% t "Valor billing" %}{% endblock %}
+{% block content %}
+<h1>{% t "Valor billing" %}</h1>
+<p class="sub">ADM-01..03 · FAA Annex B · USD · senior to distributions and carry · GP jointly and severally liable · 15-day terms, 1,5% per month compounded</p>
+
+<div class="card scroll">
+  <h2>{% t "Next invoice (draft)" %} · {% t "Approved NAV" %} {{ nav|money:0 }} {% if last %}({{ last.quarter_end|date:"d.m.Y" }}){% endif %}</h2>
+  <table>
+    <tr><th>Code</th><th>{% t "What" %}</th><th class="n">Qty</th><th class="n">Unit</th><th class="n">{% t "Total" %}</th></tr>
+    {% for l in draft.lines %}<tr><td class="mono">{{ l.code }}</td><td>{{ l.description }}</td><td class="n">{{ l.quantity|money:0 }}</td><td class="n">{{ l.unit|money }}</td><td class="n">{{ l.amount|money }}</td></tr>{% endfor %}
+    <tr class="total"><td></td><td>{% t "Total" %}</td><td></td><td></td><td class="n">{{ draft.total|money }}</td></tr>
+  </table>
+  <p class="note">AUM tier {{ draft.tier.label }} → {{ draft.tier.annual|money }} p.a.{% for n in draft.notes %} · <strong>{{ n }}</strong>{% endfor %}</p>
+</div>
+
+<div class="card scroll">
+  <table>
+    <tr><th>{% t "Invoice" %}</th><th>{% t "Period" %}</th><th>{% t "Issued" %}</th><th class="n">{% t "Total" %}</th><th>{% t "Paid" %}</th><th class="n">{% t "Overdue days" %}</th><th class="n">{% t "Late interest" %}</th></tr>
+    {% for x in invoices %}
+    <tr>
+      <td><strong>{{ x.invoice.number }}</strong>
+        <div class="note">{% for l in x.invoice.lines %}{{ l.code }} {{ l.amount|money }}{% if not forloop.last %} · {% endif %}{% endfor %}</div></td>
+      <td>{{ x.invoice.period_start|date:"d.m.Y" }} – {{ x.invoice.period_end|date:"d.m.Y" }}</td>
+      <td>{{ x.invoice.issued|date:"d.m.Y" }}</td>
+      <td class="n">{{ x.invoice.total|money }}</td>
+      <td>{% if x.invoice.paid %}{{ x.invoice.paid|date:"d.m.Y" }}{% else %}<span class="tag warn">{% t "unpaid" %}</span>{% endif %}</td>
+      <td class="n">{% if x.overdue_days %}<span class="tag bad">{{ x.overdue_days }}</span>{% else %}0{% endif %}</td>
+      <td class="n">{{ x.late_interest|money }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

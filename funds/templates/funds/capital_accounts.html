@@ -1,0 +1,30 @@
+{% extends "funds/base.html" %}{% load valor %}
+{% block title %}{% t "Capital accounts" %}{% endblock %}
+{% block content %}
+<h1>{% t "Capital accounts" %}</h1>
+<p class="sub">ACC-01, ACC-02 · {{ as_of|date:"d.m.Y" }} · USD · NAV per partner = hypothetical liquidation through the waterfall (LPA cl. 9.2)</p>
+<div class="card scroll">
+<table>
+  <tr><th></th>{% for a in summary.accounts %}<th class="n">{{ a.partner.code }}</th>{% endfor %}<th class="n">{% t "Total" %}</th></tr>
+  <tr><td>{% t "Commitment" %}</td>{% for a in summary.accounts %}<td class="n">{{ a.commitment|money }}</td>{% endfor %}<td class="n">{{ summary.totals.commitment|money }}</td></tr>
+  <tr><td>{% t "Contributions" %}</td>{% for a in summary.accounts %}<td class="n">{{ a.paid_in|money }}</td>{% endfor %}<td class="n">{{ summary.totals.paid_in|money }}</td></tr>
+  <tr class="sub"><td class="note">— {% t "of which investments" %}</td>{% for a in summary.accounts %}<td class="n note">{{ a.paid_in_investments|money }}</td>{% endfor %}<td></td></tr>
+  <tr class="sub"><td class="note">— {% t "of which fees and expenses" %}</td>{% for a in summary.accounts %}<td class="n note">{{ a.paid_in_fees|money }}</td>{% endfor %}<td></td></tr>
+  <tr><td>{% t "Unfunded commitment" %}</td>{% for a in summary.accounts %}<td class="n">{{ a.unfunded|money }}</td>{% endfor %}<td class="n">{{ summary.totals.unfunded|money }}</td></tr>
+  <tr><td>{% t "Distributed" %}</td>{% for a in summary.accounts %}<td class="n">{{ a.distributed|money }}</td>{% endfor %}<td class="n">{{ summary.totals.distributed|money }}</td></tr>
+  <tr class="sub"><td class="note">— T1 {% t "Return of capital" %}</td>{% for a in summary.accounts %}<td class="n note">{{ a.tiers.0|money }}</td>{% endfor %}<td></td></tr>
+  <tr class="sub"><td class="note">— T2 {% t "Preferred return" %}</td>{% for a in summary.accounts %}<td class="n note">{{ a.tiers.1|money }}</td>{% endfor %}<td></td></tr>
+  <tr class="sub"><td class="note">— T3 {% t "GP catch-up" %}</td>{% for a in summary.accounts %}<td class="n note">{{ a.tiers.2|money }}</td>{% endfor %}<td></td></tr>
+  <tr class="sub"><td class="note">— T4 {% t "Residual split" %}</td>{% for a in summary.accounts %}<td class="n note">{{ a.tiers.3|money }}</td>{% endfor %}<td></td></tr>
+  <tr><td>{% t "P&L allocated" %}</td>{% for a in summary.accounts %}<td class="n">{{ a.pnl|money }}</td>{% endfor %}<td></td></tr>
+  <tr class="total"><td>NAV</td>{% for a in summary.accounts %}<td class="n">{{ a.nav|money }}</td>{% endfor %}<td class="n">{{ summary.totals.nav|money }}</td></tr>
+  <tr><td>{% t "Preferred return accrued" %}</td>{% for a in summary.accounts %}<td class="n">{{ a.pref_accrued|money }}</td>{% endfor %}<td></td></tr>
+  <tr><td>{% t "Accrued carry" %}</td>{% for a in summary.accounts %}<td class="n">{{ a.accrued_carry|money }}</td>{% endfor %}<td class="n">{{ summary.totals.accrued_carry|money }}</td></tr>
+  <tr><td>{% t "Clawback exposure" %}</td>{% for a in summary.accounts %}<td class="n">{{ a.clawback_exposure|money }}</td>{% endfor %}<td class="n">{{ summary.totals.clawback_exposure|money }}</td></tr>
+  <tr><td>DPI</td>{% for a in summary.accounts %}<td class="n">{{ a.dpi|mult }}</td>{% endfor %}<td class="n">{{ summary.totals.dpi|mult }}</td></tr>
+  <tr><td>RVPI</td>{% for a in summary.accounts %}<td class="n">{{ a.rvpi|mult }}</td>{% endfor %}<td class="n">{{ summary.totals.rvpi|mult }}</td></tr>
+  <tr><td>TVPI</td>{% for a in summary.accounts %}<td class="n">{{ a.tvpi|mult }}</td>{% endfor %}<td class="n">{{ summary.totals.tvpi|mult }}</td></tr>
+  <tr><td>{% t "Net IRR" %}</td>{% for a in summary.accounts %}<td class="n">{{ a.irr|pct }}</td>{% endfor %}<td class="n">{{ summary.totals.irr|pct }}</td></tr>
+</table>
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "funds/base.html" %}{% load valor %}
+{% block title %}{% t "Register" %}{% endblock %}
+{% block content %}
+<h1>{% t "Register" %}</h1>
+<p class="sub">REG-01, TA-01, AML-01..03 · FAA cl. 4, Annex A cl. 9-10</p>
+<div class="card scroll">
+<table>
+  <tr><th>{% t "Partner" %}</th><th>{% t "Type" %}</th><th>{% t "Country" %}</th><th>{% t "KYC / AML" %}</th><th>{% t "FATCA / CRS" %}</th>
+      <th class="n">{% t "Commitment" %}</th><th class="n">{% t "Share" %}</th><th class="n">{% t "Paid-in" %}</th><th class="n">{% t "Unfunded" %}</th><th>{% t "Side letter" %}</th></tr>
+  {% for p in partners %}{% with a=accounts|get:p.pk %}
+  <tr>
+    <td><strong>{{ p.code }}</strong> {{ p.name }}{% if p.is_defaulting %} <span class="tag bad">defaulting</span>{% endif %}</td>
+    <td>{{ p.get_kind_display }}</td>
+    <td>{{ p.country }}</td>
+    <td><span class="tag {% if p.kyc_status == 'approved' %}ok{% elif p.kyc_status == 'rejected' %}bad{% else %}warn{% endif %}">{{ p.get_kyc_status_display }}</span>
+        {% if not p.can_transact and p.kind == 'LP' %}<div class="note">{% t "Capital activity blocked until GP approval" %}</div>{% endif %}
+        <div class="note">risk: {{ p.risk_rating }}</div></td>
+    <td class="note">{{ p.fatca_crs }}</td>
+    <td class="n">{% if a %}{{ a.commitment|money:0 }}{% else %}—{% endif %}</td>
+    <td class="n">{% if a %}{{ a.share|pct:2 }}{% else %}—{% endif %}</td>
+    <td class="n">{% if a %}{{ a.paid_in|money:0 }}{% else %}—{% endif %}</td>
+    <td class="n">{% if a %}{{ a.unfunded|money:0 }}{% else %}—{% endif %}</td>
+    <td class="note">{{ p.side_letter }}</td>
+  </tr>
+  {% endwith %}{% endfor %}
+</table>
+</div>
+{% endblock %}

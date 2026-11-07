@@ -1,0 +1,23 @@
+# Local development: only the database. Django runs from .venv (python manage.py runserver).
+# Port 5433 so it never clashes with the leasing database on 5432.
+name: valor
+
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-valor}
+      POSTGRES_USER: ${POSTGRES_USER:-valor}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-valor}
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-valor} -d ${POSTGRES_DB:-valor}"]
+      interval: 5s
+      retries: 10
+
+volumes:
+  pgdata:

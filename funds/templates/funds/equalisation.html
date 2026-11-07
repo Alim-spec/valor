@@ -1,0 +1,37 @@
+{% extends "funds/base.html" %}{% load valor %}
+{% block title %}{% t "Equalisation" %}{% endblock %}
+{% block content %}
+<h1>{% t "Equalisation" %}</h1>
+<p class="sub">COM-02, EQL-01..02 · LPA cl. 5, 9.3(c)(ii) · three legs computed and routed separately</p>
+<div class="card">
+  <form method="get" class="inline">
+    <div><label>{% t "New LP" %}</label><input name="name" value="{{ form.name }}"></div>
+    <div><label>{% t "Commitment" %} USD</label><input name="commitment" inputmode="decimal" value="{{ form.commitment }}"></div>
+    <div><label>{% t "Admission date" %}</label><input type="date" name="admission" value="{{ form.admission }}"></div>
+    <button class="btn">{% t "Calculate" %}</button>
+  </form>
+  {% if error %}<p class="msgs"><span class="error">{{ error }}</span></p>{% endif %}
+</div>
+{% if s %}
+<div class="kpis">
+  <div class="kpi"><div class="l">1. {% t "Catch-up contribution" %}</div><div class="v">{{ s.catch_up|money }}</div><div class="s">→ existing LPs</div></div>
+  <div class="kpi"><div class="l">2. {% t "Equalisation interest" %}</div><div class="v">{{ s.interest_total|money }}</div><div class="s">→ existing LPs</div></div>
+  <div class="kpi"><div class="l">3. {% t "Fee equalisation" %}</div><div class="v">{{ s.fee_equalisation|money }}</div><div class="s">→ GP</div></div>
+  <div class="kpi"><div class="l">3a. {% t "Fee equalisation interest" %}</div><div class="v">{{ s.fee_equalisation_interest|money }}</div><div class="s">→ GP</div></div>
+  <div class="kpi"><div class="l">{% t "Total payable by new LP" %}</div><div class="v">{{ s.total_payable_by_new_lp|money }}</div></div>
+</div>
+<div class="grid2">
+  <div class="card scroll">
+    <table>
+      <tr><th>{% t "Partner" %}</th><th class="n">{% t "Refund" %}</th><th class="n">{% t "Equalisation interest" %}</th><th class="n">{% t "Drawn after rebalancing" %}</th></tr>
+      {% for lp, amt in s.refunds.items %}<tr><td>{{ lp }}</td><td class="n">{{ amt|money }}</td><td class="n">{{ s.interest|get:lp|money }}</td><td class="n">{{ s.drawn_after|get:lp|money }}</td></tr>{% endfor %}
+      <tr class="total"><td>{{ s.new_lp }}</td><td class="n">−{{ s.catch_up|money }}</td><td class="n">−{{ s.interest_total|money }}</td><td class="n">{{ s.drawn_after|get:s.new_lp|money }}</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h2>Audit trail</h2>
+    {% for line in s.lines %}<div class="mono">{{ line }}</div>{% endfor %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}

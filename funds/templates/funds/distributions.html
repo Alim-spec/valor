@@ -1,0 +1,49 @@
+{% extends "funds/base.html" %}{% load valor %}
+{% block title %}{% t "Distributions" %}{% endblock %}
+{% block content %}
+<h1>{% t "Distributions" %}</h1>
+<p class="sub">WF-01..04, CI-01..02, NFR-04 · {% t "Four-eyes: the maker cannot approve" %}</p>
+
+{% if can_make %}
+<div class="card">
+  <h2>{% t "New distribution" %}</h2>
+  <form method="post" class="inline">
+    {% csrf_token %}
+    <div><label>{% t "Investment" %}</label>
+      <select name="investment" required>{% for i in investments %}<option value="{{ i.pk }}" {% if form.investment == i.pk|stringformat:"s" %}selected{% endif %}>{{ i.code }} {{ i.name }}</option>{% endfor %}</select></div>
+    <div><label>{% t "Date" %}</label><input type="date" name="date" value="{{ form.date }}" required></div>
+    <div><label>{% t "Gross proceeds (USD)" %}</label><input name="gross" inputmode="decimal" value="{{ form.gross|default:'' }}" placeholder="20000000" required></div>
+    <div><label>{% t "Investment status after" %}</label>
+      <select name="status">{% for v, l in statuses %}<option value="{{ v }}" {% if form.status == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+    <button class="btn light" name="action" value="preview">{% t "Calculate" %}</button>
+    {% if preview %}<button class="btn" name="action" value="submit">{% t "Submit for approval" %}</button>{% endif %}
+  </form>
+</div>
+{% endif %}
+
+{% if preview %}
+<div class="card">
+  <h2>{% t "Preview — nothing is saved" %}</h2>
+  {% include "funds/_waterfall.html" with r=preview %}
+</div>
+{% endif %}
+
+<div class="card scroll">
+<table>
+  <tr><th>#</th><th>{% t "Date" %}</th><th>{% t "Investment" %}</th><th class="n">{% t "Gross proceeds (USD)" %}</th><th class="n">{% t "To LP" %}</th><th class="n">{% t "To CIR" %}</th><th>{% t "Status" %}</th><th>{% t "Made by" %}</th><th>{% t "Approved by" %}</th></tr>
+  {% for d in items %}
+  <tr>
+    <td><a href="{% url 'distribution' d.pk %}">#{{ d.pk }}</a></td>
+    <td>{{ d.date|date:"d.m.Y" }}</td>
+    <td>{{ d.investment.code }} {{ d.investment.name }}</td>
+    <td class="n">{{ d.gross_amount|money }}</td>
+    <td class="n">{{ d.result.totals.lp|money }}</td>
+    <td class="n">{{ d.result.totals.cir|money }}</td>
+    <td><span class="tag {% if d.state == 'approved' %}ok{% elif d.state == 'rejected' %}bad{% else %}warn{% endif %}">{% t d.get_state_display %}</span></td>
+    <td>{{ d.created_by.username }}</td>
+    <td>{{ d.approved_by.username|default:"—" }}</td>
+  </tr>
+  {% empty %}<tr><td colspan="9" class="note">{% t "none" %}</td></tr>{% endfor %}
+</table>
+</div>
+{% endblock %}

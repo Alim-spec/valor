@@ -1,0 +1,55 @@
+{% load static valor %}<!doctype html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>{% block title %}{% t "Fund Administration" %}{% endblock %} · Valor Capital</title>
+<link rel="icon" href="{% static 'funds/favicon.ico' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'funds/valor.css' %}">
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <a class="brand" href="{% url 'dashboard' %}"><img src="{% static 'funds/valor-logo.svg' %}" alt="Valor Capital"></a>
+    <div class="product">{% t "Fund Administration" %}</div>
+    {% with n=request.resolver_match.url_name %}
+    <nav>
+      <a href="{% url 'dashboard' %}" class="{% if n == 'dashboard' %}on{% endif %}">{% t "Dashboard" %}</a>
+      <div class="group">LPA</div>
+      <a href="{% url 'register' %}" class="{% if n == 'register' %}on{% endif %}">{% t "Register" %}</a>
+      <a href="{% url 'capital_accounts' %}" class="{% if n == 'capital_accounts' %}on{% endif %}">{% t "Capital accounts" %}</a>
+      <a href="{% url 'investments' %}" class="{% if n == 'investments' %}on{% endif %}">{% t "Investments" %}</a>
+      <a href="{% url 'distributions' %}" class="{% if n == 'distributions' or n == 'distribution' %}on{% endif %}">{% t "Distributions" %}</a>
+      <a href="{% url 'fees' %}" class="{% if n == 'fees' %}on{% endif %}">{% t "Management fee" %}</a>
+      <a href="{% url 'equalisation' %}" class="{% if n == 'equalisation' %}on{% endif %}">{% t "Equalisation" %}</a>
+      <div class="group">FAA</div>
+      <a href="{% url 'service_levels' %}" class="{% if n == 'service_levels' %}on{% endif %}">{% t "FAA service levels" %}</a>
+      <a href="{% url 'billing' %}" class="{% if n == 'billing' %}on{% endif %}">{% t "Valor billing" %}</a>
+      <div class="group">{% t "Control" %}</div>
+      <a href="{% url 'acceptance' %}" class="{% if n == 'acceptance' %}on{% endif %}">{% t "Acceptance tests" %}</a>
+      <a href="{% url 'terms' %}" class="{% if n == 'terms' %}on{% endif %}">{% t "Fund terms" %}</a>
+      <a href="{% url 'audit' %}" class="{% if n == 'audit' %}on{% endif %}">{% t "Audit trail" %}</a>
+    </nav>
+    {% endwith %}
+  </aside>
+  <div class="main">
+    <header class="top">
+      <div class="fund">{{ fund.name }}<small>{{ fund.legal_form }} · {{ fund.base_currency }}</small></div>
+      <div class="right">
+        <span class="demo-flag">{% t "Demo environment — fictitious data" %}</span>
+        <span class="langs"><a href="?lang=en" class="{% if lang == 'en' %}on{% endif %}">EN</a><a href="?lang=ru" class="{% if lang == 'ru' %}on{% endif %}">RU</a></span>
+        <span>{{ request.user.username }}{% if roles %} · {{ roles|join:", " }}{% endif %}</span>
+        <form method="post" action="{% url 'logout' %}" style="margin:0">{% csrf_token %}<button class="btn light" type="submit">{% t "Sign out" %}</button></form>
+      </div>
+    </header>
+    <main class="content">
+      {% if messages %}<ul class="msgs">{% for m in messages %}<li class="{{ m.tags }}">{{ m }}</li>{% endfor %}</ul>{% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+</body>
+</html>

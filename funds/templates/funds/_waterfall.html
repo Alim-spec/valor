@@ -1,0 +1,33 @@
+{% load valor %}
+<div class="scroll">
+<table>
+  <tr><th>{% t "Partner" %}</th><th class="n">{% t "Slice" %}</th><th class="n">{% t "Hurdle" %} (A+B+C)</th>
+      <th class="n">T1 {% t "Return of capital" %}</th><th class="n">T2 {% t "Preferred return" %}</th>
+      <th class="n">T3 {% t "GP catch-up" %}</th><th class="n">T4 LP / CIR</th>
+      <th class="n">{% t "To LP" %}</th><th class="n">{% t "To CIR" %}</th><th class="n">{% t "Clawback exposure" %}</th></tr>
+  {% for pk, p in r.partners.items %}
+  <tr>
+    <td style="min-width:210px"><strong>{{ p.code }}</strong> {{ p.name }}<div class="note">{% t "Preferred return accrued" %} {{ p.pref_accrued|money }}</div></td>
+    <td class="n">{{ p.slice|money }}</td>
+    <td class="n">{{ p.hurdle|money }}<div class="note">{{ p.hurdle_parts.A|money }} + {{ p.hurdle_parts.B|money }} + {{ p.hurdle_parts.C|money }}</div>
+      <div class="note">{% t "Returned before" %} {{ p.roc_paid_before|money }}</div></td>
+    <td class="n">{{ p.tiers.0.lp|money }}</td>
+    <td class="n">{{ p.tiers.1.lp|money }}</td>
+    <td class="n">{{ p.tiers.2.cir|money }}</td>
+    <td class="n">{{ p.tiers.3.lp|money }} / {{ p.tiers.3.cir|money }}</td>
+    <td class="n"><strong>{{ p.to_lp|money }}</strong></td>
+    <td class="n"><strong>{{ p.to_cir|money }}</strong></td>
+    <td class="n">{% if p.clawback_exposure != "0.00" and p.clawback_exposure != "0" %}<span class="tag warn">{{ p.clawback_exposure|money }}</span>{% else %}0,00{% endif %}</td>
+  </tr>
+  {% endfor %}
+  <tr class="total"><td>{% t "Totals" %}</td><td></td><td></td>
+    <td class="n">{{ r.totals.t1_lp|money }}</td><td class="n">{{ r.totals.t2_lp|money }}</td><td class="n">{{ r.totals.t3_cir|money }}</td>
+    <td class="n">{{ r.totals.t4_lp|money }} / {{ r.totals.t4_cir|money }}</td>
+    <td class="n">{{ r.totals.lp|money }}</td><td class="n">{{ r.totals.cir|money }}</td><td class="n">{{ r.totals.exposure|money }}</td></tr>
+</table>
+</div>
+<p class="note" style="margin-top:10px">
+  {% t "Carry to GP (60%)" %}: <strong>{{ r.totals.gp|money }}</strong> · {% t "Carry to Vehicle (40%)" %}: <strong>{{ r.totals.vehicle|money }}</strong>
+  · {% t "Clause" %}: T1 LPA cl. 8.2(b)(i) · T2 cl. 8.1, 8.2(b)(ii) · T3 cl. 8.2(b)(iii) · T4 cl. 8.2(b)(iv) · 60/40 cl. 8.2(c)
+  · {% t "Fund terms" %} v{{ r.terms_version }} · {% t "Engine" %} {{ r.engine_version }}
+</p>

@@ -1,0 +1,45 @@
+{% extends "funds/base.html" %}{% load valor %}
+{% block title %}{% t "FAA service levels" %}{% endblock %}
+{% block content %}
+<h1>{% t "FAA service levels" %}</h1>
+<p class="sub">SLA-01..05 · FAA cl. 3.4-3.5, Annex C · business days, Astana calendar · cut-off {{ sla.cut_off_days }} calendar days · draft NAV ≤{{ sla.draft_nav_bd }} BD · deemed approval {{ sla.deemed_approval_bd }} BD · final NAV ≤{{ sla.final_nav_bd }} BD</p>
+<div class="card scroll">
+<table>
+  <tr><th>{% t "Quarter end" %}</th><th>{% t "Cut-off" %}</th><th>{% t "GP inputs received" %}</th><th>{% t "Clock start" %}</th><th>{% t "Draft NAV due" %}</th><th>{% t "Draft issued" %}</th><th>{% t "Approval" %}</th><th>{% t "Final NAV due" %}</th><th>NAV / unit</th><th>{% t "Status" %}</th></tr>
+  {% for row in rows %}{% with q=row.q tl=row.tl %}
+  <tr>
+    <td><strong>{{ q.quarter_end|date:"d.m.Y" }}</strong></td>
+    <td>{{ tl.cut_off|date:"d.m.Y"|default:"—" }}</td>
+    <td>{{ q.inputs_received|date:"d.m.Y"|default:"—" }} {% if tl.inputs_late %}<span class="tag warn">late</span>{% endif %}</td>
+    <td>{{ tl.clock_start|date:"d.m.Y"|default:"—" }}</td>
+    <td>{{ tl.draft_nav_due|date:"d.m.Y"|default:"—" }}
+      {% if tl and q.draft_issued and q.draft_issued > tl.draft_nav_due %}<span class="tag bad">breach</span>{% elif tl and not q.draft_issued and today > tl.draft_nav_due %}<span class="tag bad">overdue</span>{% endif %}</td>
+    <td>{{ q.draft_issued|date:"d.m.Y"|default:"—" }}</td>
+    <td>{{ tl.approved|date:"d.m.Y"|default:"—" }} {% if tl.approval_kind %}<span class="tag {% if tl.approval_kind == 'deemed' %}warn{% else %}ok{% endif %}">{% t tl.approval_kind %}{% if tl.approved > today %} · {% t "expected" %}{% endif %}</span>{% endif %}</td>
+    <td>{{ tl.final_nav_due|date:"d.m.Y"|default:"—" }}</td>
+    <td class="n">{{ q.nav_per_unit|money:6 }}</td>
+    <td>{% if q.locked %}<span class="tag ok">closed</span>{% else %}<span class="tag neutral">open</span>{% endif %}</td>
+  </tr>
+  {% endwith %}{% endfor %}
+</table>
+</div>
+
+<div class="card scroll">
+  <h2>{% t "NAV Error Register" %} · {% t "Material" %} &gt; 0,10%</h2>
+  <table>
+    <tr><th>{% t "Quarter" %}</th><th>{% t "What" %}</th><th class="n">Published</th><th class="n">Recomputed</th><th class="n">{% t "Impact" %}</th><th>{% t "Status" %}</th><th>{% t "Notify GP by" %}</th><th>{% t "Corrective NAV by" %}</th></tr>
+    {% for row in rows %}{% for x in row.errors %}
+    <tr>
+      <td>{{ row.q.quarter_end|date:"d.m.Y" }}</td>
+      <td>{{ x.e.description }}<div class="note">discovered {{ x.e.discovered|date:"d.m.Y" }}</div></td>
+      <td class="n">{{ x.e.published_nav_per_unit|money:6 }}</td>
+      <td class="n">{{ x.e.recomputed_nav_per_unit|money:6 }}</td>
+      <td class="n">{{ x.a.impact|pct:2 }}</td>
+      <td>{% if x.a.material %}<span class="tag bad">{% t "Material" %} · L3</span>{% else %}<span class="tag neutral">prospective</span>{% endif %}<div class="note">{{ x.a.treatment }}</div></td>
+      <td>{{ x.a.notify_gp_by|date:"d.m.Y"|default:"—" }}</td>
+      <td>{{ x.a.corrective_nav_by|date:"d.m.Y"|default:"—" }}</td>
+    </tr>
+    {% endfor %}{% endfor %}
+  </table>
+</div>
+{% endblock %}

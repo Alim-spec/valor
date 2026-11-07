@@ -1,0 +1,22 @@
+{% extends "funds/base.html" %}{% load valor %}
+{% block title %}{% t "Acceptance tests" %}{% endblock %}
+{% block content %}
+<h1>{% t "Acceptance tests" %}</h1>
+<p class="sub">TST-01, TST-04 · Appendix A golden cases, recomputed live by the engine on every page view · {% t "Engine" %} {{ engine_version }}</p>
+<div class="kpis">
+  <div class="kpi"><div class="l">{% t "Result" %}</div><div class="v">{{ passed }} / {{ results|length }}</div><div class="s">{% if passed == results|length %}<span class="tag ok">{% t "passed" %}</span>{% else %}<span class="tag bad">{% t "failed" %}</span>{% endif %}</div></div>
+</div>
+<div class="card scroll">
+<table>
+  <tr><th>{% t "Case" %}</th><th>{% t "Expected" %}</th><th>{% t "Computed" %}</th><th>{% t "Result" %}</th></tr>
+  {% for r in results %}
+  <tr>
+    <td><strong>{{ r.code }}</strong><div class="note">{{ r.title }}</div></td>
+    <td class="mono">{{ r.expected }}</td>
+    <td class="mono">{{ r.computed }}</td>
+    <td>{% if r.passed %}<span class="tag ok">{% t "passed" %}</span>{% else %}<span class="tag bad">{% t "failed" %}</span>{% endif %}</td>
+  </tr>
+  {% endfor %}
+</table>
+</div>
+{% endblock %}

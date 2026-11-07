@@ -1,0 +1,38 @@
+{% extends "funds/base.html" %}{% load valor %}
+{% block title %}#{{ dist.pk }} · {% t "Distributions" %}{% endblock %}
+{% block content %}
+<p><a href="{% url 'distributions' %}">← {% t "Back" %}</a></p>
+<h1>#{{ dist.pk }} · {{ dist.investment.code }} {{ dist.investment.name }}</h1>
+<p class="sub">{{ dist.date|date:"d.m.Y" }} · {{ dist.gross_amount|money }} USD · {{ dist.get_investment_status_after_display }}
+  · <span class="tag {% if dist.state == 'approved' %}ok{% elif dist.state == 'rejected' %}bad{% else %}warn{% endif %}">{% t dist.get_state_display %}</span>
+  · {% t "Made by" %} {{ dist.created_by.username }}{% if dist.approved_by %} · {% t "Approved by" %} {{ dist.approved_by.username }} {{ dist.approved_at|date:"d.m.Y H:i" }}{% endif %}</p>
+
+<div class="card">
+  {% include "funds/_waterfall.html" with r=r %}
+</div>
+
+{% if dist.state == 'draft' %}
+<div class="card">
+  {% if can_approve %}
+  <form method="post" action="{% url 'distribution_decide' dist.pk %}" class="inline">
+    {% csrf_token %}
+    <button class="btn ok" name="action" value="approve">{% t "Approve" %}</button>
+    <input name="reason" placeholder="{% t 'Why' %}">
+    <button class="btn bad" name="action" value="reject">{% t "Reject" %}</button>
+  </form>
+  {% else %}
+  <p class="note">{% t "Four-eyes: the maker cannot approve" %}</p>
+  {% endif %}
+</div>
+{% endif %}
+
+{% if ledger %}
+<div class="card scroll">
+  <h2>{% t "Ledger" %} · DIST-{{ dist.pk }}</h2>
+  <table>
+    <tr><th>{% t "Account" %}</th><th>{% t "Partner" %}</th><th class="n">{% t "Debit" %}</th><th class="n">{% t "Credit" %}</th><th>{% t "Memo" %}</th></tr>
+    {% for e in ledger %}<tr><td>{{ e.account }}</td><td>{{ e.partner.code|default:"" }}</td><td class="n">{{ e.debit|money }}</td><td class="n">{{ e.credit|money }}</td><td class="note">{{ e.memo }}</td></tr>{% endfor %}
+  </table>
+</div>
+{% endif %}
+{% endblock %}

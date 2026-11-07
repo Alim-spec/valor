@@ -1,0 +1,28 @@
+{% extends "funds/base.html" %}{% load valor %}
+{% block title %}{% t "Fund terms" %}{% endblock %}
+{% block content %}
+<h1>{% t "Fund terms" %}</h1>
+<p class="sub">ARC-02 · LPA-derived configuration, versioned; a new fund is onboarded by configuration, not code</p>
+<div class="grid2">
+  <div class="card scroll">
+    <table>
+      <tr><th>{% t "Parameter" %}</th><th>{% t "Value" %}</th></tr>
+      {% for k, v in current.items %}{% if k != 'clauses' %}<tr><td class="mono">{{ k }}</td><td class="mono">{{ v }}</td></tr>{% endif %}{% endfor %}
+    </table>
+  </div>
+  <div>
+    <div class="card scroll">
+      <table>
+        <tr><th>{% t "Version" %}</th><th>{% t "Effective from" %}</th><th>{% t "Why" %}</th><th>{% t "Made by" %}</th><th>{% t "Approved by" %}</th></tr>
+        {% for v in versions %}<tr><td>v{{ v.version }}</td><td>{{ v.effective_from|date:"d.m.Y" }}</td><td>{{ v.reason }}</td><td>{{ v.created_by.username }}</td><td>{{ v.approved_by.username|default:"—" }}</td></tr>{% endfor %}
+      </table>
+    </div>
+    <div class="card scroll">
+      <table>
+        <tr><th>{% t "Clause" %}</th><th></th></tr>
+        {% for k, v in current.clauses.items %}<tr><td class="mono">{{ k }}</td><td>{{ v }}</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

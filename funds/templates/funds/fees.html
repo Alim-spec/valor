@@ -1,0 +1,26 @@
+{% extends "funds/base.html" %}{% load valor %}
+{% block title %}{% t "Management fee" %}{% endblock %}
+{% block content %}
+<h1>{% t "Management fee" %}</h1>
+<p class="sub">FEE-01..03 · LPA cl. 9.3-9.4 · 2% p.a., quarterly in advance; Commitment basis to the 5th anniversary, then net invested cost; 100% Fee Income offset, never below zero</p>
+{% for q in quarters %}
+<div class="card scroll">
+  <h2>{% t "Quarter" %} {{ q.start|date:"d.m.Y" }} – {{ q.end|date:"d.m.Y" }}</h2>
+  <table>
+    <tr><th>{% t "Partner" %}</th><th>{% t "Basis" %}</th><th class="n">{% t "Gross fee" %}</th><th class="n">{% t "Fee Income offset" %}</th><th class="n">{% t "Net fee" %}</th><th class="n">{% t "Carried forward" %}</th></tr>
+    {% for r in q.rows %}
+    <tr>
+      <td>{{ r.partner.code }} {{ r.partner.name }}</td>
+      <td>{% if r.basis.kind == 'commitment' %}{% t "Commitment basis" %}{% else %}{% t "Net invested cost" %}{% endif %} {{ r.basis.amount|money:0 }}</td>
+      <td class="n">{{ r.gross|money }}</td>
+      <td class="n">{% if r.offset %}−{{ r.offset|money }}{% else %}0,00{% endif %}</td>
+      <td class="n"><strong>{{ r.net|money }}</strong></td>
+      <td class="n">{{ r.carried_forward|money }}</td>
+    </tr>
+    {% endfor %}
+    <tr class="total"><td>{% t "Total" %}</td><td></td><td class="n">{{ q.gross|money }}</td><td class="n">{% if q.offset %}−{{ q.offset|money }}{% else %}0,00{% endif %}</td><td class="n">{{ q.net|money }}</td><td></td></tr>
+  </table>
+</div>
+{% endfor %}
+<p class="note">Demo: Fee Income of 60 000,00 (transaction fee) received in Q1 2026 offsets the 01.04.2026 instalment pro rata to Commitments.</p>
+{% endblock %}

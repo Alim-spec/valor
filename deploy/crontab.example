@@ -1,0 +1,1 @@
+0 3 * * * root /opt/valor/deploy/backup.sh >> /var/log/valor-backup.log 2>&1

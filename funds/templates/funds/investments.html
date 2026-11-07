@@ -1,0 +1,27 @@
+{% extends "funds/base.html" %}{% load valor %}
+{% block title %}{% t "Investments" %}{% endblock %}
+{% block content %}
+<h1>{% t "Investments" %}</h1>
+<p class="sub">FX-01, FX-02 · LPA cl. 4.2, 9.3(c)(i) · IAS 21: cost frozen at the Investment Exchange Rate, fair value at closing rate</p>
+<div class="card scroll">
+<table>
+  <tr><th>{% t "Investment" %}</th><th>{% t "Status" %}</th><th>{% t "Acquired" %}</th><th>{% t "Currency" %}</th>
+      <th class="n">{% t "Acquisition cost" %}</th><th class="n">{% t "Investment Exchange Rate" %}</th><th class="n">{% t "Fee base (frozen)" %} USD</th>
+      <th class="n">{% t "Fair value" %}</th><th class="n">{% t "Closing rate" %}</th><th class="n">{% t "Fair value" %} USD</th></tr>
+  {% for r in rows %}
+  <tr>
+    <td><strong>{{ r.inv.code }}</strong> {{ r.inv.name }}<div class="note">{{ r.inv.sector }} · {{ r.inv.holding_entity }}</div></td>
+    <td><span class="tag {% if r.inv.status == 'realised' %}ok{% elif r.inv.status == 'written_off' %}bad{% else %}neutral{% endif %}">{{ r.inv.get_status_display }}</span></td>
+    <td>{{ r.inv.acquired|date:"d.m.Y" }}</td>
+    <td>{{ r.inv.currency }}</td>
+    <td class="n">{{ r.cost.local|money }}</td>
+    <td class="n">{{ r.cost.weighted_rate|money:2 }}</td>
+    <td class="n"><strong>{{ r.cost.usd|money }}</strong></td>
+    <td class="n">{{ r.inv.fair_value_local|money }}</td>
+    <td class="n">{{ r.inv.closing_rate|money:2 }}</td>
+    <td class="n">{{ r.fv_usd|money }}</td>
+  </tr>
+  {% endfor %}
+</table>
+</div>
+{% endblock %}
