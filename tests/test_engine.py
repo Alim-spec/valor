@@ -4,7 +4,7 @@ from datetime import date
 
 import pytest
 
-from engine.config import CACPEF_TERMS as T, FundTerms
+from engine.config import VCPEF_TERMS as T, FundTerms
 from engine.fees import quarterly_instalment
 from engine.irr import preferred_return_outstanding, xirr
 from engine.money import D, allocate, fmt

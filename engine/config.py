@@ -1,7 +1,7 @@
 """Fund economics as configuration (ARC-02).
 
 A new fund is onboarded by a new FundTerms value, never by new code.
-CACPEF_TERMS mirrors the CACPEF LPA; every field names the clause it comes from.
+VCPEF_TERMS mirrors the VCPEF LPA; every field names the clause it comes from.
 """
 
 from dataclasses import asdict, dataclass, field
@@ -63,4 +63,4 @@ class FundTerms:
         return cls(**kwargs)
 
 
-CACPEF_TERMS = FundTerms()
+VCPEF_TERMS = FundTerms()

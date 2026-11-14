@@ -5,7 +5,7 @@ from datetime import date
 import pytest
 
 from engine.admin_fees import FAA_SCHEDULE, cpi_escalate, days_overdue, late_interest, quarterly_invoice
-from engine.config import CACPEF_TERMS as T
+from engine.config import VCPEF_TERMS as T
 from engine.equalisation import Drawdown, equalise
 from engine.fees import annual_fee, apply_offset, fee_basis, quarterly_instalment
 from engine.fx import translate_investment, usd_acquisition_cost

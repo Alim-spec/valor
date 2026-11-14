@@ -131,11 +131,12 @@ def lp_distributions_paid(partner: Partner, before: date | None = None):
 
 
 def pref_accrued(partner: Partner, state: LPState, as_of: date) -> Decimal:
-    """Total preferred return accrued to as_of (PR-01): 8% IRR compounded annually,
-    excluding recallable contributions and equalisation payments."""
+    """Total preferred return accrued to as_of (PR-01): 8% IRR compounded annually, excluding
+    recallable contributions; equalisation entries count from their deemed dates, so an Additional
+    LP accrues as if admitted at the Initial Closing and earlier LPs only on what stayed theirs."""
     terms = partner.fund.terms
-    flows = [(c.funded_date, c.amount_usd) for c in partner.contributions.filter(
-        funded_date__isnull=False, funded_date__lte=as_of, recallable=False, equalisation=False)]
+    flows = [(c.effective_date, c.amount_usd) for c in partner.contributions.filter(
+        funded_date__isnull=False, funded_date__lte=as_of, recallable=False)]
     contributed = sum((a for _, a in flows), ZERO)
     outstanding = preferred_return_outstanding(
         flows, lp_distributions_paid(partner, as_of), contributed - state.roc_paid, as_of,
@@ -380,13 +381,13 @@ def fee_schedule(fund: Fund, upto: date, fee_income: dict | None = None) -> list
             c = comm.get(p.pk, ZERO)
             if not c:
                 continue
-            first = p.commitments.order_by('date').first()
+            admitted = p.commitments.order_by('date').first().date
             net_cost = _net_invested_cost(p, q_start)
             basis = fee_basis(terms, q_start, fund.initial_closing, c, net_cost)
-            # an Additional LP pays as if admitted at the Initial Closing (equalised separately)
-            gross = quarterly_instalment(terms, basis.amount, q_start, q_end, from_date=fund.initial_closing)
-            if first and first.date > q_end:
-                continue
+            # Fee before an Additional LP's admission is collected as fee equalisation (EQL-02);
+            # from admission it pays the regular instalments.
+            gross = quarterly_instalment(terms, basis.amount, q_start, q_end,
+                                         from_date=max(fund.initial_closing, admitted))
             off = apply_offset(terms, gross, shares.get(p.pk, ZERO), carried[p.pk])
             carried[p.pk] = off.carried_forward
             rows.append({'quarter': q_start, 'quarter_end': q_end, 'partner': p, 'basis': basis,
@@ -413,9 +414,10 @@ def equalisation_preview(fund: Fund, new_lp: str, new_commitment: Decimal, admis
     by_dd = defaultdict(dict)
     dates = {}
     for c in contributions(fund, admission):
-        if c.partner.kind in WATERFALL_KINDS and not c.equalisation:
+        # capital drawn for investments and expenses; the fee is equalised separately (leg 3)
+        if c.partner.kind in WATERFALL_KINDS and c.purpose != Contribution.FEE:
             by_dd[c.drawdown_no][c.partner.code] = by_dd[c.drawdown_no].get(c.partner.code, ZERO) + c.amount_usd
-            dates[c.drawdown_no] = c.funded_date
+            dates.setdefault(c.drawdown_no, c.effective_date)
     drawdowns = [Drawdown(dates[n], by_dd[n]) for n in sorted(by_dd)]
     return equalise(terms, commitments={p.code: comm.get(p.pk, ZERO) for p in lps if comm.get(p.pk)},
                     drawdowns=drawdowns, new_lp=new_lp, new_commitment=D(new_commitment),

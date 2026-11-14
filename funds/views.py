@@ -204,7 +204,7 @@ def fees(request):
 
 def equalisation(request):
     fund = fund_or_404()
-    form = {'name': request.GET.get('name', 'New LP'), 'commitment': request.GET.get('commitment', '10000000'),
+    form = {'name': request.GET.get('name', 'LP04'), 'commitment': request.GET.get('commitment', '50000000'),
             'admission': request.GET.get('admission', today().isoformat())}
     statement = error = None
     try:

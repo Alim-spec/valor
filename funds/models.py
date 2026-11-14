@@ -155,7 +155,14 @@ class Contribution(models.Model):
     fx_source = models.CharField(max_length=100, blank=True)
     amount_usd = models.DecimalField(**MONEY)
     recallable = models.BooleanField(default=False)
-    equalisation = models.BooleanField(default=False)
+    equalisation = models.BooleanField(default=False, help_text='Rebalancing entry on a Subsequent Closing')
+    deemed_date = models.DateField(null=True, blank=True,
+                                   help_text='Date the flow counts from as if all LPs were admitted at the '
+                                             'Initial Closing (equalisation, LPA cl. 5, 8.1)')
+
+    @property
+    def effective_date(self):
+        return self.deemed_date or self.funded_date
 
     class Meta:
         ordering = ['notice_date', 'drawdown_no', 'partner__code']

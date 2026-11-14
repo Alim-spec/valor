@@ -1,6 +1,6 @@
 """Distribution waterfall engine (WF-01..04, CI-01..02).
 
-CACPEF (cl. 8.2) is a per-LP, per-Investment waterfall:
+VCPEF (cl. 8.2) is a per-LP, per-Investment waterfall:
   1. Return of capital — 100% to the LP until cumulative tier-1 equals, without duplication,
      its Contributions funding (A) the realised Investment, (B) every other Investment fully
      realised or fully written off, (C) Partnership/Organisational Expenses incl. the fee.
